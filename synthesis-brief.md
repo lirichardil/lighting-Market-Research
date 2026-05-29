@@ -33,6 +33,75 @@ Sweet spot: the $250K–$1M renovation budget tier — too big for retail, too m
 
 ---
 
+## Customer Pain Points 痛点
+Research sources: Houzz forums, Reddit, Quora, Yelp, BBB, Business of Home, AIA publications, Inside.lighting
+Full sourced files: painpoints-consumers.md / painpoints-designers.md / painpoints-other-platforms.md
+
+### 1. Can't visualize the end result
+Most common complaint across every platform. Homeowners cannot picture how a fixture or light level will look in their actual space until it's installed — by which point it's expensive or impossible to fix cheaply.
+- Houzz user: "I simply can't visualize" before purchasing
+- Designers confirm lighting surprises are routine and discovered after installation
+- Homeowners review 80–100 pendants and still leave showrooms without a decision
+→ FOR LIGHT opportunity: visualization support, mockups, pre-spec consultation as a standard service step
+
+### 2. Color temperature — the silent regret
+2700K vs. 3000K vs. 3500K generates widespread anxiety and frequent post-install regret. No retailer currently guides customers through this decision.
+- Real outcomes documented: "hospital lighting," "airport runway," "we never turn them on"
+- Products frequently mislabeled online: sold as 3000K, delivered 2700K, no labeling on box
+- The 2700K vs. 3000K decision alone generated 6+ separate Houzz threads with anxious homeowners
+→ FOR LIGHT opportunity: CCT as a guided human-assisted decision, not a spec sheet
+
+### 3. Showroom staff are useless
+- Yelp (Yaya Y.): "They literally look you directly in your eyes and don't say a word"
+- Staff cannot answer technical questions beyond what is on the box
+- Store layouts so dense customers leave without buying
+- Salespeople push margin, not fit
+→ FOR LIGHT opportunity: consultative sales — knowledgeable, patient, technically fluent
+
+### 4. Post-install regrets with no corrective path
+- Six named commenters on a single design blog describing hating their recessed lighting after installation
+- Builder forgot to install recessed lights entirely in one documented case
+- Electrician placed cans before cabinet layout was finalized — one overlapped a cabinet
+- New-build homeowner (Houzz, CupcakeDreams): "I DID NOT PUT MUCH THOUGHT TO LIGHT FIXTURES… I am hating myself right now"
+→ FOR LIGHT opportunity: pre-installation walkthrough and sign-off as a standard service step
+
+### 5. Lead times, backorders, discontinuations — with no warning
+- Katrina Tate (designer): two separate fixtures discontinued only after placing paid orders — both times learned via a status call
+- Robert Brinkman: 17-week lead time landed on a 16-week project schedule
+- Visual Comfort replacement shades marked "no date" after 4-month wait — no plans to manufacture
+- BBB complaint: $651 fixture ordered March 2023, backordered to August, refund not issued until January 2024
+- Cree/Audacy controls platform discontinued mid-project on a commercial sports facility (Greg Ehrich, Premier Lighting)
+→ FOR LIGHT opportunity: supply chain transparency and China-direct sourcing as reliability differentiator
+
+### 6. Coordination between trades is broken
+- Electricians, lighting designers, AV integrators, architects operate in silos
+- Electrician installed cans in wrong location despite to-scale drawings, then charged for the move
+- Non-UL fixtures sourced by designers create installation liability for electricians
+- Architects flip door swings without notifying electricians — switch placement becomes contested
+→ FOR LIGHT opportunity: this is exactly what 声光电视 as one-stop single-contract service solves
+
+### 7. Spec substitutions destroy design intent
+- Donna Leban, AIA LC: "Why bother spending so much time to select lighting when we never end up with the fixtures we specified?"
+- Avi Mor (Morlights): a $0.50 fixture substitution caused trim to fall onto a mahogany conference table
+- Ardra Zinkon, CLD IALD: "value erosion dressed up as savings"
+→ FOR LIGHT opportunity: own the full procurement chain — substitutions require designer approval
+
+### 8. Rep and vendor responsiveness failures
+- Rainey Richardson (designer): six weeks just to get a quote from a rep
+- Colleen Farrell: showroom took deposit then went completely dark
+- Jennifer Glickman: vendor disappeared right before order placement
+- Visual Comfort user "marcolo": four months waiting for replacement shades; "no one returns her call for days, or sometimes ever"
+→ FOR LIGHT opportunity: responsiveness and accountability as explicit brand promises
+
+### 9. Hospitality/commercial: budget is the first thing cut
+- Andrew Moore (HLB Lighting Design): "the luminaire package is often one of the first places contractors look to reduce costs"
+- Production run color inconsistency documented across 200 hotel guest rooms
+- Jurisdictional split between FF&E and construction budgets creates coordination gaps nobody owns
+- 2026 legal case: $620K in hotel lighting orders, zero functional fixtures delivered
+→ FOR LIGHT opportunity: single-contract accountability from design through commissioning for hospitality clients
+
+---
+
 ## Competitive Landscape
 
 ### Ultra-Premium Fixture Brands (products only, no service)
@@ -137,7 +206,10 @@ Recommendation: Start with rep agency showroom space before committing to standa
 
 ## Files in this folder
 - positioning-map.html — visual business model and competitor map (open in browser)
-- research-competitors.md — full sourced competitor research
-- research-marketing.md — full sourced marketing strategy research
-- research-brand-identity.md — full sourced brand identity research
+- research-competitors.md — sourced competitor research
+- research-marketing.md — sourced marketing strategy research
+- research-brand-identity.md — sourced brand identity research
+- painpoints-consumers.md — consumer/homeowner pain points (Houzz, Reddit, Quora, Amazon, Yelp)
+- painpoints-designers.md — designer/architect pain points (Business of Home, AIA, Inside.lighting)
+- painpoints-other-platforms.md — multi-platform pain points (Houzz, Quora, Yelp, hospitality)
 - synthesis-brief.md — this file
