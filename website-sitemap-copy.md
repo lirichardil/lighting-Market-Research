@@ -1,6 +1,6 @@
 # FOR LIGHT — Website Sitemap & Copywriting
-Date: 2026-06-03
-Status: Draft v1
+Date: 2026-06-04
+Status: Draft v2 — updated per client review
 
 ---
 
@@ -14,10 +14,24 @@ FOR LIGHT
 │   ├── Commercial Lighting Design
 │   ├── Exterior Lighting Design
 │   └── Our Process
-├── Lighting Fixtures  (Shop)
-│   ├── Collections / All Products
-│   ├── [Category] — e.g. Pendants, Sconces, Architectural, Outdoor
-│   ├── Product Detail Page
+├── Fixtures
+│   ├── All Fixtures
+│   ├── Pendant & Suspension
+│   │   ├── [Product Name] — Individual Product Page
+│   │   ├── [Product Name] — Individual Product Page
+│   │   └── ...
+│   ├── Wall Sconces
+│   │   ├── [Product Name] — Individual Product Page
+│   │   └── ...
+│   ├── Architectural / Recessed
+│   │   ├── [Product Name] — Individual Product Page
+│   │   └── ...
+│   ├── Track & Accent
+│   │   ├── [Product Name] — Individual Product Page
+│   │   └── ...
+│   ├── Outdoor & Exterior
+│   │   ├── [Product Name] — Individual Product Page
+│   │   └── ...
 │   └── Trade Program
 ├── Custom Manufacturing
 │   ├── How It Works
@@ -28,6 +42,9 @@ FOR LIGHT
 │   └── Contact / Showroom
 └── (Cart / Checkout — e-commerce layer)
 ```
+
+**Note on Individual Product Pages:**
+Each fixture has its own dedicated URL (e.g. `/fixtures/pendants/harbour-pendant`). The page includes: full photography, product description, technical specs (CCT, CRI, dimming, IP rating), IES file download, spec sheet download, lead time, price, Add to Cart, and Add to Trade Quote. No fixture shares a page with another fixture.
 
 ---
 
@@ -40,19 +57,23 @@ FOR LIGHT
 **Hero**
 Headline: `FOR LIGHT`
 Subheadline: `We exist to serve light. Everything we do — from design to manufacturing — is in pursuit of one thing: the best possible quality of light in your space.`
-CTA buttons: `Explore Design Services` · `Shop Fixtures`
+CTA buttons: `Explore Design Services` · `Browse Fixtures` · `Custom Manufacturing`
 
 ---
 
-**Two-column value split (below hero)**
+**What We Do (three stacked sections, full-width)**
 
-Left panel — Design Services
-> **Light, designed for your space.**
+**Design Services**
 > We design lighting environments for residential and commercial interiors — and exteriors — that perform beautifully from the first switch to ten years later. One team, one contract, zero coordination gaps.
+> `Explore Design Services →`
 
-Right panel — Products
-> **Fixtures worth specifying.**
-> A curated selection of premium fixtures ready to ship — plus custom manufacturing for designs that don't exist yet. Direct from source, with full traceability.
+**Fixtures**
+> A curated selection of premium lighting fixtures — sourced directly, priced transparently, shipped with full technical documentation. Every fixture has its own page with complete specifications.
+> `Browse All Fixtures →`
+
+**Custom Manufacturing**
+> Have a design in mind that doesn't exist in any catalog? We manufacture it — from prototype to production run, UL/ETL-compliant, shipped to your site.
+> `Learn About Custom Manufacturing →`
 
 ---
 
@@ -158,7 +179,7 @@ Link: `See the full process →`
 
 ---
 
-### LIGHTING FIXTURES — SHOP LANDING PAGE
+### FIXTURES — LANDING PAGE
 
 **Headline:** `Fixtures Worth Specifying`
 **Subheadline:** `A curated selection of premium lighting fixtures — sourced directly, priced transparently, shipped with full documentation.`
@@ -188,23 +209,29 @@ Link: `See the full process →`
 
 ---
 
-**Product card copy template (per fixture)**
+**Individual Product Page template**
+*(Each fixture lives at its own URL: `/fixtures/[category]/[product-name]`)*
 
 ```
 [Product Name]
 [Collection Name]
 
-[One-sentence description of the fixture's character and use case.]
+[2–3 sentence description: the fixture's character, material, light quality,
+and ideal application. Full sentences — not bullet fragments.]
 
 CCT Options: [e.g. 2700K · 3000K · 3500K]
 Dimming: [e.g. 0–10V, TRIAC, Lutron compatible]
 CRI: [e.g. >90]
 IP Rating: [if applicable]
 Lead Time: [e.g. In stock / 3–4 weeks / 8–10 weeks]
-[Download IES File]  [Download Spec Sheet]
+Warranty: 5 years
+
+[Download IES File]  [Download Spec Sheet]  [Download CAD]
 
 Price: $[XXX]
-[Add to Cart]  [Add to Quote (Trade)]
+[Add to Cart]  [Add to Trade Quote]
+
+← Back to [Category]
 ```
 
 ---
@@ -293,7 +320,7 @@ Price: $[XXX]
 
 ### ABOUT — OUR STORY
 
-**Headline:** `为光服务 — Serving Light`
+**Headline:** `FOR LIGHT — Serving Light`
 
 **Brand narrative**
 > FOR LIGHT was built on a simple inversion.
@@ -303,13 +330,6 @@ Price: $[XXX]
 > We operate out of New York City. Our design team works across residential and commercial interiors and exteriors. Our supply chain is rooted in China — the same factories that supply the world's premium lighting brands — accessed directly, with full transparency.
 >
 > We are not a showroom that sells and disappears. We are not a design firm that specifies and hands off. We are not an electrician with a fixture catalog. We are all three — and we are accountable for the whole.
-
----
-
-**What 为光 means**
-> 为 means *for* or *in service of*. 光 means *light*.
->
-> 为光 — for light. It's the name, the mission, and the standard everything we do gets measured against.
 
 ---
 
@@ -353,24 +373,21 @@ Price: $[XXX]
 
 ---
 
-## NAVIGATION STRUCTURE (final recommendation)
+## NAVIGATION STRUCTURE
 
 | Tab Label | URL slug | Notes |
 |---|---|---|
 | Home | / | |
 | Design Services | /design-services | Dropdown: Residential, Commercial, Exterior, Process |
-| Shop | /shop | E-commerce section; dropdown by category |
-| Custom | /custom | Custom manufacturing section |
-| About | /about | Brand story + contact combined, or split |
-| Trade | /trade | Trade program application — accessible from nav for B2B audience |
-| Contact | /contact | Or merged into About |
+| Fixtures | /fixtures | Dropdown by category; each product has its own page |
+| Custom Manufacturing | /custom-manufacturing | Custom manufacturing section |
+| About | /about | Brand story |
+| Trade | /trade | Trade program — accessible from nav for B2B audience |
+| Contact | /contact | |
 
 ---
 
 ## OPEN DECISIONS FOR CLIENT
 
-1. **Trade tab visibility**: Should the Trade Program link appear in the main nav (making the B2B audience feel welcome) or be a secondary link from the Shop and Design pages only?
-2. **Shop vs. "Fixtures"**: Tab label — `Shop`, `Fixtures`, or `Lighting Fixtures`? `Shop` is direct; `Fixtures` is more design-industry appropriate.
-3. **Custom tab label**: `Custom Manufacturing`, `Custom Fixtures`, or `Bespoke`? The last feels more premium but less immediately clear.
-4. **Bilingual copy**: Should certain pages carry Chinese-language versions (for mainland China or diaspora clients), or English-only for launch?
-5. **Blog/Journal**: Omitted from v1. Add a `Journal` tab later for CEU content, project features, and PR-driven editorial — important for SEO and designer trust once projects are complete.
+1. **Trade tab visibility**: Should the Trade Program link appear in the main nav (making the B2B audience feel welcome) or be a secondary link from the Fixtures and Design Services pages only?
+2. **Blog/Journal**: Omitted from v1. Add a `Journal` tab later for CEU content, project features, and PR-driven editorial — important for SEO and designer trust once reference projects are complete.
