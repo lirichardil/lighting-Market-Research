@@ -7,238 +7,486 @@ Feed this entire document to your AI coding tool (Cursor, Claude, ChatGPT, etc.)
 
 Build a complete, single-file interactive landing page (`index.html`) for a luxury lighting design company called **FOR LIGHT**. The page must be entirely self-contained — all CSS and JavaScript embedded within the HTML file, no external files except CDN links. Use **vanilla HTML5, CSS3, and JavaScript (ES6+)**. Load **GSAP 3** via CDN for animations. No frameworks (no React, Vue, etc.).
 
-The page has **four sequential acts** that flow into each other. Each act is a full-screen experience.
+The page has **four sequential acts** (the cinematic intro experience) followed by the **main homepage content**. The design language is precisely specified below — follow it exactly.
+
+---
+
+## DESIGN SYSTEM
+
+This design system governs every pixel of the page. Do not deviate from it.
+
+### Color Tokens
+
+Define all colors as CSS custom properties on `:root`. Never use hardcoded hex values in component styles — always reference the tokens.
+
+```css
+:root {
+  --bg:       #f1e9d8;  /* Primary page background — warm parchment */
+  --bgDeep:   #e6dcc4;  /* Hover states, secondary backgrounds */
+  --cream:    #faf4e6;  /* Near-white: text on dark, nav dropdowns */
+  --ink:      #1c2118;  /* Primary text — deep forest-tinted near-black */
+  --inkMute:  rgba(28,33,24,0.74); /* Secondary text */
+  --inkSoft:  rgba(28,33,24,0.92); /* Body copy */
+  --rule:     rgba(28,33,24,0.13); /* Hairline dividers */
+  --moss:     #3a5239;  /* Deep forest green — utility bar background */
+  --mossDeep: #243325;  /* Darker forest — footer background */
+  --terra:    #b8654a;  /* Terracotta — primary accent / CTA color */
+  --terraDeep:#8a4733;  /* Deeper terracotta — hover state for CTAs */
+  --gold:     #a98448;  /* Warm antique gold — mega menus, highlights */
+}
+```
+
+**Palette logic:**
+- Page backgrounds: `--bg` (parchment). Never white, never cool gray, never black for normal content.
+- Primary text: `--ink` on light backgrounds. `--cream` on dark (moss/mossDeep) backgrounds.
+- Structure: `--moss` for the utility bar. `--mossDeep` for the footer.
+- Calls to action: `--terra` fill, `--cream` text. Hover: `--terraDeep`.
+- Decorative highlights: `--gold` (sparingly — mega menus, pull quotes).
+- No blues. No cool grays. This is a warm-earthen brand.
+
+---
+
+### Typography
+
+Load from Google Fonts:
+```html
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+```
+
+**Cormorant Garamond** (weight 300–400): All display headlines, hero text, the wordmark "FOR LIGHT", the footer logo, pull quotes. Emotional, editorial, architectural. Wide letter-spacing.
+
+**Jost** (weight 200–600): Navigation, body copy, eyebrows, buttons, captions, form labels, utility text. Geometric, controlled.
+
+**Scale:**
+```css
+/* Sizes use clamp() for fluid scaling */
+.title-xl  { font-family: 'Cormorant Garamond', serif; font-size: clamp(56px, 8vw, 108px); font-weight: 300; letter-spacing: 0.04em; }
+.title-lg  { font-family: 'Cormorant Garamond', serif; font-size: clamp(44px, 5.6vw, 78px);  font-weight: 300; letter-spacing: 0.04em; }
+.title-md  { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 3.5vw, 52px);  font-weight: 300; letter-spacing: 0.03em; }
+.eyebrow   { font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; color: var(--inkMute); }
+.body-copy { font-family: 'Jost', sans-serif; font-size: 17px; font-weight: 300; line-height: 1.78; color: var(--inkSoft); }
+.btn-label { font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; }
+```
+
+---
+
+### Layout
+
+```css
+.container { max-width: 1280px; margin: 0 auto; padding: 0 6vw; }
+section    { padding: 100px 0; }
+```
+
+**No border-radius anywhere on this site.** Every element — buttons, inputs, cards, image containers, dropdowns — is sharp-cornered. `border-radius: 0` is a design signature. Enforce it globally:
+```css
+*, *::before, *::after { border-radius: 0 !important; }
+```
+
+Hairline rules: `border: none; border-top: 1px solid var(--rule);`
+
+---
+
+### Motion System
+
+**Standard easing:** `cubic-bezier(0.22, 1, 0.36, 1)` — fast start, springy deceleration. Use for all transitions and GSAP tweens.
+
+**GSAP defaults:**
+```javascript
+gsap.defaults({ ease: 'power3.out', duration: 0.7 });
+// For spring feel: use CustomEase or cubic-bezier(0.22,1,0.36,1)
+```
+
+**Scroll entrance (Rise pattern):** Elements that enter the viewport animate from:
+```css
+opacity: 0; transform: translateY(26px);
+```
+to `opacity: 1; transform: translateY(0)` using `IntersectionObserver`. Apply this to: section headlines, body paragraphs, image blocks, stat numbers.
+
+**Film grain overlay:** Apply a subtle noise texture site-wide using an SVG filter:
+```html
+<svg style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;opacity:0.025;mix-blend-mode:multiply;">
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+  <rect width="100%" height="100%" filter="url(#grain)"/>
+</svg>
+```
+
+**Custom cursor:** On desktop, hide the default cursor (`cursor: none`). Draw a small 6px terracotta circle that follows the mouse with a subtle lag (GSAP quickTo, duration 0.15s). During Acts 0–2 the cursor glow replaces this.
+
+---
+
+### Navigation
+
+The navigation appears after the cinematic intro (Acts 0–3) is complete.
+
+**Utility bar** (32px tall, fixed at top, `z-index: 100`):
+```css
+background: var(--mossDeep); color: var(--cream);
+font-family: 'Jost'; font-size: 11px; font-weight: 400; letter-spacing: 0.2em;
+display: flex; align-items: center; justify-content: space-between; padding: 0 6vw;
+```
+Content: left = "New York City" | center = "FOR LIGHT" | right = "Launching 2026 · Contact"
+
+**Main nav** (68px tall, below utility bar, sticky):
+- Initial state (over hero): `background: transparent`, with a dark gradient behind it for readability.
+- Scrolled state (after 80px scroll): `background: rgba(241,233,216,0.92); backdrop-filter: blur(14px)`.
+- Logo: "FOR LIGHT" in Cormorant Garamond, 22px, weight 300, letter-spacing 0.22em, color `--ink`.
+- Nav links: Jost, 11px, weight 500, letter-spacing 0.22em, uppercase, color `--ink`. Active link has an underline that scales in from the left via `transform: scaleX()` on a `::after` pseudo-element.
+- CTA button: "Book a Consultation" — `--terra` background over hero, transitions to `--ink` background on scroll.
+
+**Mega menu dropdowns** (Design Services + Fixtures only):
+- Full-width panel, `background: var(--cream)`, 1px solid `--rule` border at top.
+- Grid layout: `display: grid; grid-template-columns: repeat(4, 1fr);`
+- Section headers in `--gold`, body links in `--ink`, `font-size: 13px`.
+
+Nav items: `Home · Design Services · Fixtures · Custom Manufacturing · About · Trade · Contact`
+
+---
+
+### Buttons
+
+Four variants. All `border-radius: 0`, `cursor: pointer`, `transition: all 0.3s cubic-bezier(0.22,1,0.36,1)`.
+
+```css
+/* Solid (default) */
+.btn-solid { background: var(--ink); color: var(--cream); padding: 14px 32px; }
+.btn-solid:hover { background: var(--inkMute); }
+
+/* Terra (primary CTA) */
+.btn-terra { background: var(--terra); color: var(--cream); padding: 14px 32px; }
+.btn-terra:hover { background: var(--terraDeep); }
+
+/* Ghost */
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); padding: 13px 31px; }
+.btn-ghost:hover { background: var(--ink); color: var(--cream); }
+
+/* Moss */
+.btn-moss { background: var(--moss); color: var(--cream); padding: 14px 32px; }
+.btn-moss:hover { background: var(--mossDeep); }
+```
+
+All button labels use `.btn-label` class (11px, Jost, 500 weight, 0.28em letter-spacing, uppercase).
+
+---
+
+### Footer
+
+```css
+footer { background: var(--mossDeep); color: var(--cream); padding: 80px 6vw 48px; }
+```
+
+4-column grid layout:
+- Col 1: Wordmark "FOR LIGHT" in Cormorant Garamond, 36px, + tagline "Serving Light" in Jost 12px.
+- Col 2: Design Services links
+- Col 3: Products links (Fixtures, Custom Manufacturing, Trade)
+- Col 4: Company links (About, Contact) + "Book a Consultation" terra button
+
+Divider above footer bottom: 1px `rgba(250,244,230,0.15)` rule.
+Copyright line: Jost 11px, `rgba(250,244,230,0.5)`.
 
 ---
 
 ## ACT 0 — CURSOR AS LIGHT SOURCE (Entry State)
 
 **What the user sees:**
-- The screen is completely black on load.
-- The user's mouse cursor emits a soft, warm circular pool of light (~180px radius) wherever it moves — like holding a candle in a dark room.
-- Beneath the black overlay is a high-resolution image of a half-open curtain (`assets/curtain.jpg`). The cursor's light circle reveals parts of this image as the user moves around.
-- In the very center of the screen, in elegant serif type, appears the text: **"FOR LIGHT"** — barely visible at first, revealed when the cursor passes over it.
-- Below the title, in smaller type: **"Move to explore. Click to enter."**
-- When the cursor is near the center CTA area, a subtle animated pulse rings outward from the text.
+- On load: full viewport is completely dark — a near-black overlay (`rgba(28,33,24,1)` — the `--ink` color, not pure black) covers everything.
+- The user's cursor emits a soft circular pool of warm antique gold light (~180px radius) wherever it moves. The darkness peels back at the cursor, revealing parts of a high-resolution curtain photograph (`assets/curtain.jpg`) beneath.
+- Centered on screen, in Cormorant Garamond, weight 300: **"FOR LIGHT"** — in `--cream` color, font-size `clamp(64px, 9vw, 120px)`, letter-spacing 0.14em. Revealed only when the cursor passes over it.
+- Below the wordmark: **"Move to explore. Click to enter."** — Jost, 11px, weight 400, letter-spacing 0.28em, uppercase, `rgba(250,244,230,0.55)`.
+- When cursor is within 80px of center: a hairline ring (`1px solid rgba(250,244,230,0.3)`) pulses outward from the wordmark at 2-second intervals.
 
 **Technical implementation:**
-- Use an HTML5 `<canvas>` element covering the full viewport, positioned above the curtain image with `position: fixed; z-index: 10`.
-- On every `mousemove` event, clear the canvas and draw a radial gradient centered on the cursor: inner color `rgba(255, 200, 100, 0.35)`, outer color `rgba(0, 0, 0, 0)`, radius 180px. The canvas background is `rgba(0, 0, 0, 1)` — solid black everywhere except the gradient.
-- Use `canvas.globalCompositeOperation = 'source-over'` — paint the warm circle, then fill the rest with black.
-- The curtain image sits in a `<div>` behind the canvas with `z-index: 1`.
-- On `click` anywhere, trigger Act 1.
-- On touch devices (no cursor): skip Act 0, go directly to Act 1 with a tap-to-enter button.
+- Canvas element covers full viewport: `position: fixed; inset: 0; z-index: 20; pointer-events: none`.
+- Enable `pointer-events: all` only for the click trigger on the underlying page layer.
+- On `mousemove`: use `requestAnimationFrame` — never draw on raw mousemove events.
+- Each frame: fill canvas with `rgba(28,33,24,1)`, then draw a radial gradient at cursor position:
+  - Inner: `rgba(169,132,72,0.38)` (--gold at 38% opacity)
+  - Mid: `rgba(184,101,74,0.12)` (--terra trace)
+  - Outer: `rgba(0,0,0,0)` — transparent
+  - Radius: 180px
+- `ctx.globalCompositeOperation = 'destination-out'` to cut the circle out of the dark overlay, revealing the image beneath.
+- Curtain image: `position: fixed; inset: 0; object-fit: cover; z-index: 10;`
+- Wordmark + instruction text: `position: fixed; z-index: 25` (above canvas) — always visible but appear dim against the darkness.
+- On `click` anywhere: trigger Act 1.
+- Mobile / touch: skip Act 0. Show curtain image immediately with a centered "Enter" button (terra, Jost uppercase).
 
 ---
 
 ## ACT 1 — CURTAIN REVEAL + CINEMATIC VIDEO
 
-**Trigger:** User clicks anywhere during Act 0.
+**Trigger:** Click during Act 0.
 
 **What the user sees:**
-- The canvas black overlay fades out over 1.2 seconds — the half-open curtain image is now fully visible.
-- Simultaneously, an HTML5 `<video>` begins playing (muted, no controls). The video shows: a curtain slowly closing, then the camera zooms out to reveal a full living room with large floor-to-ceiling windows opening to a balcony. The room is dimly lit — warm, low ambient light only.
-- The video plays once. When it ends, Act 2 begins automatically.
-- A small "Skip" button in the lower-right corner lets users bypass the video.
+- The dark canvas fades out over 1.4 seconds (GSAP, `cubic-bezier(0.22,1,0.36,1)`) — the curtain image becomes fully visible.
+- After 0.3s pause, the HTML5 `<video>` crossfades in and begins playing (muted, no controls, `playsinline`). The video shows: a curtain slowly drawing closed, camera zooms out smoothly to reveal a full living room with floor-to-ceiling windows opening to a balcony. Room is dimly lit — only warm ambient candle-level light.
+- Video plays once. Ends → Act 2.
+- "Skip" text link appears at bottom-right after 2 seconds: Jost 10px uppercase, `rgba(250,244,230,0.5)`, appears only after 2s delay. Clicking calls `startAct2()`.
 
 **Technical implementation:**
-- Video element: `<video id="cinematic" src="assets/intro-video.mp4" muted playsinline preload="auto">`. Hidden initially.
-- On Act 0 click: GSAP `fadeOut` canvas + curtain image (1.2s), then crossfade in the video element.
+- `<video id="cinematic" src="assets/intro-video.mp4" muted playsinline preload="auto" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:15;opacity:0">`.
+- On Act 0 click: `gsap.to(canvas, { opacity: 0, duration: 1.4, ease: 'power2.inOut', onComplete: () => { video.style.opacity = 1; video.play(); } })`.
 - `video.addEventListener('ended', startAct2)`.
-- Skip button: `position: fixed; bottom: 32px; right: 32px;` — clicking it calls `startAct2()` directly.
-- Video must be `object-fit: cover` to fill the full viewport without letterboxing.
+- Skip: `setTimeout(() => skipBtn.style.opacity = '1', 2000)`.
 
-**Asset required:**
-- `assets/curtain.jpg` — high-res still of a half-open curtain (warm interior light behind it)
-- `assets/intro-video.mp4` — 8–12 second cinematic clip: curtain closes, zoom out to living room
+**Assets required:**
+- `assets/curtain.jpg` — linen or silk curtain, half-open, warm amber interior light beyond. Style: cinematic, warm, parchment tones.
+- `assets/intro-video.mp4` — 8–12 sec. Curtain slowly closes → camera pulls back → full living room revealed in warm dim light.
 
 ---
 
 ## ACT 2 — INTERACTIVE ROOM: HOVER TO ILLUMINATE
 
-**Trigger:** Video ends (or Skip is clicked).
+**Trigger:** Video ends or Skip clicked.
 
 **What the user sees:**
-- The room is shown as a still photograph (`assets/room-dim.jpg`): a living room, floor-to-ceiling windows, balcony visible beyond, warm minimal ambient light.
-- Scattered around the room are invisible hotspots positioned at the exact locations of visible light fixtures in the photograph (e.g., a floor lamp at left, a pendant over a table, recessed lights in the ceiling, a wall sconce near the balcony door).
-- When the user hovers over a fixture hotspot, a warm amber light bloom expands outward from that point — as if the fixture has just turned on. The bloom uses `mix-blend-mode: screen` on a canvas overlay so it naturally lights up the photograph beneath.
-- Multiple fixtures can be lit simultaneously.
-- Hovering off a fixture slowly dims the bloom (0.6s fade out).
-- When the first fixture is lit, elegant copy appears at bottom-center: **"This is what designed light feels like."**
-- After all fixtures are lit (or after 6 seconds), a CTA button fades in: **"Enter the Site"** — clicking it scrolls smoothly to Act 3.
+- Crossfade from video to a still photograph (`assets/room-dim.jpg`): modern luxury NYC apartment living room, floor-to-ceiling windows, balcony visible, minimal warm ambient light only. Style consistent with `--bg` palette — cream walls, dark wood floors, linen furniture.
+- Invisible fixture hotspots are positioned at the location of each visible light fixture in the photo.
+- On hover over a hotspot: a warm gold light bloom (`--gold` palette) expands from the fixture position using canvas + `mix-blend-mode: screen`. The photograph beneath visibly brightens at that point — as if the fixture switched on.
+- Multiple fixtures illuminate simultaneously.
+- Hover-off: bloom fades out over 0.6s.
+- When the first fixture lights up, text fades in at bottom-center: `"This is what designed light feels like."` — Cormorant Garamond, 26px, weight 300, letter-spacing 0.08em, `--cream`.
+- When all fixtures are lit (or 6s after first is lit): a button fades in: `"Enter the Site"` — `btn-terra` style. Clicking scrolls to Act 3.
 
 **Technical implementation:**
-- Room image: full-screen `<img>` with `object-fit: cover`.
-- Canvas overlay: same dimensions as viewport, `position: absolute; top: 0; left: 0; mix-blend-mode: screen; pointer-events: none`.
-- Fixture hotspots: an array of objects, each with `{ x: %, y: %, radius: 200, color: 'rgba(255,180,60,0.5)' }`. Coordinates defined as percentages of viewport width/height so they scale correctly.
-- On hover, animate each hotspot's `opacity` from 0 to 1 using GSAP (duration 0.4s, ease: 'power2.out'). On mouse-out, animate back to 0 (0.6s).
-- Redraw the canvas on each animation frame: clear, then for each active hotspot draw a radial gradient from the hotspot center.
-
-**Placeholder fixture hotspot coordinates (adjust to match your actual room photo):**
+- Room image: `position: fixed; inset: 0; object-fit: cover; z-index: 5; opacity: 0` — GSAP fade in from 0 when Act 2 starts.
+- Canvas overlay: `position: fixed; inset: 0; z-index: 6; mix-blend-mode: screen; pointer-events: none`.
+- Fixture hotspots (array of `{ id, x, y, radius, intensity }` — coordinates as 0–1 fractions of viewport):
 ```javascript
 const fixtures = [
-  { id: 'floor-lamp',    x: 0.15, y: 0.65, radius: 220, intensity: 0 },
-  { id: 'pendant',       x: 0.50, y: 0.35, radius: 180, intensity: 0 },
-  { id: 'recessed-1',   x: 0.30, y: 0.12, radius: 150, intensity: 0 },
-  { id: 'recessed-2',   x: 0.70, y: 0.12, radius: 150, intensity: 0 },
-  { id: 'wall-sconce',  x: 0.85, y: 0.50, radius: 160, intensity: 0 },
+  { id: 'floor-lamp',  x: 0.15, y: 0.65, radius: 220, intensity: 0 },
+  { id: 'pendant',     x: 0.50, y: 0.35, radius: 180, intensity: 0 },
+  { id: 'recessed-1', x: 0.30, y: 0.12, radius: 150, intensity: 0 },
+  { id: 'recessed-2', x: 0.70, y: 0.12, radius: 150, intensity: 0 },
+  { id: 'wall-sconce', x: 0.85, y: 0.50, radius: 160, intensity: 0 },
 ];
 ```
+- Invisible `<div>` hotspot triggers: `position: fixed`, sized ~80px × 80px at each fixture coordinate. `mouseover` → GSAP tween `fixture.intensity` to 1 (0.4s). `mouseout` → tween to 0 (0.6s).
+- Canvas render loop (rAF): for each fixture, if `intensity > 0`, draw radial gradient:
+  - Center: `rgba(169,132,72, intensity * 0.55)` (--gold)
+  - Mid: `rgba(184,101,74, intensity * 0.2)` (--terra trace)
+  - Edge: transparent
+- On mobile: convert hotspots to tap-to-toggle.
 
 **Asset required:**
-- `assets/room-dim.jpg` — same room as video final frame, high-res still, dim warm ambient light
+- `assets/room-dim.jpg` — same room as video final frame, dim warm ambient light, 3840×2160
 
 ---
 
 ## ACT 3 — TIME OF DAY AMBIENT SCROLL
 
-**Trigger:** User clicks "Enter the Site" or scrolls past Act 2.
+**Trigger:** "Enter the Site" button, or scroll past the Act 2 viewport.
 
 **What the user sees:**
-- The page transitions into a scroll-driven experience. The same room is displayed, but now the environment changes as the user scrolls downward.
-- At the **top** of the scroll: the room is completely dark. Night. The windows show a dark sky. All artificial lights are off.
-- As the user scrolls down, the scene transitions through:
-  1. **Pre-dawn** (0–20% scroll): very faint blue-gray light at the horizon through the window
-  2. **Sunrise** (20–50% scroll): warm amber and gold spill through the window, long shadows
-  3. **Golden hour** (50–80% scroll): the room is flooded in warm golden light, every surface glowing
-  4. **Full daylight** (80–100% scroll): bright, balanced natural light fills the room
-- As the user scrolls, light fixtures inside the room **turn on one by one** — because as the natural light shifts, the designed lighting adjusts. Each fixture turns on at a specific scroll position with a warm bloom effect.
-- Fixed text overlays appear and fade at specific scroll positions:
-  - At 0%: *"Without designed light, this is what remains."*
-  - At 30%: *"Light defines time. Time defines how a space feels."*
-  - At 60%: *"Great lighting design isn't about the fixture. It's about the moment it creates."*
-  - At 90%: *"This is FOR LIGHT."* — followed by the main site navigation appearing
+- The page becomes scrollable. The room photograph fills the viewport as a sticky background while the user scrolls through a tall scroll section (height: 500vh).
+- As the user scrolls, the room transitions through five time-of-day states. The room image's CSS filter is interpolated in real time:
 
-**Technical implementation:**
-- Use a `scroll` event listener on `window`. Calculate scroll progress as `scrollY / (document.body.scrollHeight - window.innerHeight)` → a value from 0 to 1.
-- The room image `<img>` has a CSS filter applied in JavaScript: interpolate between states using scroll progress:
-  - `brightness`: 0.05 at 0% → 0.4 at 30% → 0.9 at 70% → 1.0 at 100%
-  - `sepia`: 0.8 at 30–60% (golden warmth) → 0 at 100%
-  - `hue-rotate`: slight warm shift (+10deg) at golden hour → 0 at daylight
-- Overlay a full-screen `<div>` with a gradient color that changes with scroll: deep navy at 0%, warm amber at 50%, sky blue-white at 100%. Use `mix-blend-mode: multiply` so it tints the photo beneath.
-- Window glow effect: a separate `<div>` positioned over the window area of the photo, its background gradient (glow color + intensity) interpolated from scroll progress.
-- Text overlays: `position: fixed`, opacity controlled by `IntersectionObserver` or scroll thresholds.
-- Fixture blooms: same canvas technique as Act 2, each fixture has a `triggerScrollPosition` (0.0–1.0). When scroll passes that threshold, animate the bloom in.
+| Scroll % | State | `brightness` | `sepia` | Overlay color |
+|---|---|---|---|---|
+| 0% | **Night** | 0.04 | 0 | `rgba(28,33,24,0.92)` — near ink |
+| 20% | **Pre-dawn** | 0.18 | 0.3 | `rgba(36,51,37,0.7)` — deep moss tint |
+| 45% | **Sunrise** | 0.55 | 0.65 | `rgba(184,101,74,0.45)` — terra glow |
+| 70% | **Golden hour** | 0.85 | 0.55 | `rgba(169,132,72,0.35)` — gold flood |
+| 100% | **Full daylight** | 1.0 | 0 | `rgba(241,233,216,0.0)` — clear |
 
-**Fixture turn-on scroll triggers:**
+- A separate `<div>` positioned over the window area of the photo intensifies in brightness as scroll progresses (simulating sunlight entering through glass).
+- Light fixtures turn on one by one as scroll progresses — same gold bloom canvas technique from Act 2:
 ```javascript
 const scrollFixtures = [
-  { id: 'lamp-1',   triggerAt: 0.15, radius: 180 },
-  { id: 'pendant',  triggerAt: 0.30, radius: 200 },
-  { id: 'sconce',   triggerAt: 0.50, radius: 160 },
-  { id: 'recessed', triggerAt: 0.65, radius: 140 },
+  { id: 'lamp-1',   triggerAt: 0.12, radius: 180 },
+  { id: 'pendant',  triggerAt: 0.28, radius: 200 },
+  { id: 'sconce',   triggerAt: 0.45, radius: 160 },
+  { id: 'recessed', triggerAt: 0.60, radius: 140 },
 ];
 ```
+- Text overlays (Cormorant Garamond, 34px, weight 300, `--cream`, centered, `position: sticky`) appear and fade at these scroll positions:
+  - 0%: *"Without designed light, this is what remains."*
+  - 28%: *"Light defines time. Time defines how a space feels."*
+  - 58%: *"Great lighting design isn't about the fixture. It's about the moment it creates."*
+  - 88%: *"This is FOR LIGHT."*
+- At 100% scroll: the utility bar and main navigation slide in from the top. The main homepage content fades in below.
 
-**At scroll = 1.0 (bottom):**
-- The FOR LIGHT main navigation bar fades in: `Home | Design Services | Fixtures | Custom Manufacturing | About | Trade | Contact`
-- Below it, the standard homepage hero copy (see below) is visible.
+**Technical implementation:**
+- Scroll progress: `const p = scrollY / (document.body.scrollHeight - window.innerHeight)`.
+- Throttle with `requestAnimationFrame` flag.
+- `brightness` / `sepia` interpolated using a lerp function between the table values above.
+- Overlay `<div>`: `position: sticky; top: 0; mix-blend-mode: multiply` — background color interpolated from the table.
+- Text overlays: `position: sticky; top: 45vh` — opacity goes from 0 → 1 → 0 as scroll passes each threshold (±8% window).
 
 ---
 
-## HOMEPAGE CONTENT (below the scroll experience)
+## HOMEPAGE CONTENT (after scroll experience)
 
-After Act 3, the page continues with standard homepage sections. These stack below the scroll experience:
+After Act 3 the page transitions to the standard homepage. Navigation (utility bar + main nav) becomes visible. Content below uses the full design system.
 
-### Hero Section
+### Intro Hero Section
+Background: `--bg`. Full viewport height. Centered.
+
 ```
-Headline: FOR LIGHT
-Subhead: New York City's only firm that designs, specifies, procures, installs,
-         and manufactures light — under one contract, with one point of accountability.
-CTAs: [Explore Design Services]  [Browse Fixtures]  [Custom Manufacturing]
-```
-
-### Three Service Sections (stacked, full-width, alternating image/text)
-
-**Section 1 — Design Services**
-```
-Headline: Lighting Design for NYC Interiors and Exteriors
-Body: We design lighting environments for residential apartments, commercial spaces,
-      and exteriors — then stay with you through installation. One team handles design,
-      specification, procurement, and contractor coordination. When the lights come on,
-      they look the way we both said they would.
-CTA: [Explore Design Services →]
+EYEBROW:   NEW YORK CITY · EST. 2026
+HEADLINE:  FOR LIGHT
+           (Cormorant Garamond, title-xl, weight 300)
+SUBHEAD:   One contract. From first design to final commission.
+           (Jost, 20px, weight 300, --inkMute)
+BODY:      New York City's only firm that designs, specifies, procures, installs,
+           and manufactures light — residential, commercial, and exterior —
+           under one contract, with one point of accountability.
+           (Jost, 17px, weight 300, --inkSoft, max-width 640px)
+CTAs:      [Explore Design Services]  (btn-terra)
+           [Browse Fixtures]          (btn-ghost)
 ```
 
-**Section 2 — Fixtures**
+Horizontal hairline rule below the hero: `1px solid var(--rule)`.
+
+---
+
+### Three Service Sections (stacked, alternating image left / text right)
+
+Each section: `padding: 100px 6vw`. Image `object-fit: cover`, aspect ratio 4:3. Text side: eyebrow + title-lg headline + body-copy paragraph + button. Rise entrance animation on both image and text block.
+
+**Section 1 — Design Services** (image right, text left)
 ```
-Headline: Fixtures Worth Specifying
-Body: Every fixture in our collection carries full IES and photometric documentation,
-      verified color temperature, and a 5-year warranty. Available for immediate purchase,
-      with each fixture on its own dedicated page — no hunting through pages of uncurated catalog.
-CTA: [Browse Fixtures →]
+EYEBROW:   DESIGN SERVICES
+HEADLINE:  Lighting Design for
+           NYC Interiors and Exteriors
+BODY:      We design lighting environments for residential apartments,
+           commercial spaces, and exteriors — then stay with you through
+           installation. One team handles design, specification, procurement,
+           and contractor coordination. When the lights come on, they look
+           the way we both said they would.
+CTA:       [Explore Design Services]   (btn-ghost)
 ```
 
-**Section 3 — Custom Manufacturing**
+**Section 2 — Fixtures** (image left, text right, background: `--bgDeep`)
 ```
-Headline: Your Design. Our Manufacturing.
-Body: Have a fixture concept that doesn't exist in any catalog? We manufacture it —
-      from prototype to production run, UL/ETL-compliant, shipped to your project site.
-      Designers, hospitality developers, and homeowners with a vision all start here.
-CTA: [Learn About Custom Manufacturing →]
+EYEBROW:   CURATED FIXTURES
+HEADLINE:  Fixtures Worth Specifying
+BODY:      Every fixture in our collection carries full IES and photometric
+           documentation, verified color temperature, and a 5-year warranty.
+           Each fixture has its own dedicated page — no hunting through
+           pages of uncurated catalog.
+CTA:       [Browse Fixtures]   (btn-ghost)
 ```
 
-### Brand Statement
+**Section 3 — Custom Manufacturing** (image right, text left)
 ```
-"Every lighting brand positions light as a means to serve people.
- We serve light itself — which is how we make the spaces it touches exceptional."
-                                                          — FOR LIGHT
+EYEBROW:   CUSTOM MANUFACTURING
+HEADLINE:  Your Design.
+           Our Manufacturing.
+BODY:      Have a fixture concept that doesn't exist in any catalog? We
+           manufacture it — from prototype to production run, UL/ETL-compliant,
+           shipped to your project site. Designers, hospitality developers,
+           and homeowners with a vision all start here.
+CTA:       [Learn About Custom Manufacturing]   (btn-ghost)
 ```
+
+---
+
+### Brand Statement Section
+Background: `--mossDeep`. Full width. `padding: 120px 6vw`. Centered.
+
+```
+PULL QUOTE:  "Every lighting brand positions light as a means to serve people.
+              We serve light itself — which is how we make the spaces it
+              touches exceptional."
+
+SOURCE:      — FOR LIGHT
+             (Jost, 12px, --gold, letter-spacing 0.3em, uppercase)
+```
+
+Quote: Cormorant Garamond, `clamp(28px, 3vw, 44px)`, weight 300, `--cream`, max-width 820px, centered, italic.
+
+---
+
+### Stats Row
+Background: `--bg`. `padding: 80px 6vw`. 4-column grid. Animated CountUp on scroll entrance.
+
+| Stat | Label |
+|---|---|
+| 9 | Pain points solved by one contract |
+| 4 | Phases from design to sign-off |
+| 5yr | Fixture warranty |
+| 1 | Point of accountability |
+
+Stat numbers: Cormorant Garamond, 72px, weight 300, `--terra`.
+Labels: Jost, 13px, weight 400, `--inkMute`, max-width 160px.
+Vertical hairline rules between columns: `1px solid var(--rule)`.
+
+---
+
+### CTA Strip
+Background: `--terra`. Full width. `padding: 80px 6vw`. Centered.
+
+```
+HEADLINE:  Ready to talk about your space?
+           (Cormorant Garamond, 52px, weight 300, --cream)
+BODY:      Whether you're planning a renovation, specifying a hospitality project,
+           or looking for a fixture that doesn't exist yet — we respond within
+           1 business day.
+           (Jost, 16px, weight 300, rgba(250,244,230,0.8))
+CTA:       [Book a Consultation]   (btn-solid, --cream bg, --terra text)
+```
+
+---
 
 ### Footer
-```
-FOR LIGHT — New York City — Launching 2026
-Design Services | Fixtures | Custom Manufacturing | About | Trade Program | Contact
-© 2026 FOR LIGHT. All rights reserved.
+```css
+footer { background: var(--mossDeep); color: var(--cream); padding: 80px 6vw 48px; }
 ```
 
----
+4-column grid. Column gap: `6vw`.
 
-## TYPOGRAPHY & VISUAL STYLE
+- **Col 1**: Wordmark "FOR LIGHT" (Cormorant Garamond, 36px, weight 300, `--cream`). Tagline "Serving Light" (Jost 12px, `--gold`, letter-spacing 0.28em, uppercase). Statement: "New York City · Launching 2026" (Jost 12px, `rgba(250,244,230,0.5)`).
+- **Col 2 — Design Services**: Eyebrow label + links: Residential, Commercial, Exterior, Our Process.
+- **Col 3 — Products**: Eyebrow label + links: Fixtures, Custom Manufacturing, Trade Program.
+- **Col 4 — Company**: Eyebrow label + links: About, Contact. Below: "Book a Consultation" (`btn-terra`, full width).
 
-- **Font stack**: `'Playfair Display', Georgia, serif` for headlines; `'Inter', system-ui, sans-serif` for body. Load both from Google Fonts.
-- **Color palette**:
-  - Background: `#0a0a0a` (near black)
-  - Primary text: `#f5f0e8` (warm white)
-  - Accent: `#c8a96e` (warm amber/gold — the color of light)
-  - Secondary text: `#8a8070` (warm gray)
-  - CTA buttons: `#c8a96e` background, `#0a0a0a` text
-- **Spacing**: generous whitespace, large type. Minimum 18px body text.
-- **Transitions**: all transitions use `ease-out` or GSAP `power2.out`. Nothing snaps — everything breathes.
-- **Cursor**: on desktop, replace the default cursor with a small warm dot (4px circle, amber color) to reinforce the light theme throughout.
+Horizontal rule: `1px solid rgba(250,244,230,0.12)` above copyright row.
+Copyright: "© 2026 FOR LIGHT. All rights reserved." — Jost, 11px, `rgba(250,244,230,0.4)`.
+
+Footer link style: Jost 14px, weight 300, `rgba(250,244,230,0.7)`. Hover: `--cream`. No underlines.
+Footer eyebrow style: Jost 11px, weight 600, letter-spacing 0.32em, uppercase, `--gold`. Margin-bottom 20px.
 
 ---
 
 ## RESPONSIVE BEHAVIOR
 
-- **Desktop (>1024px)**: Full experience as described.
-- **Tablet (768–1024px)**: Acts 0–1 play. Act 2 uses tap-to-illuminate instead of hover. Act 3 scroll experience works as described.
-- **Mobile (<768px)**: Skip Act 0 (no cursor). Show curtain still image with a "Tap to Enter" button → fade to room. Tap fixtures to illuminate. Scroll experience works as described.
+**Desktop (>1024px):** Full experience — Acts 0–3 + full homepage content. Custom cursor active.
+
+**Tablet (768–1024px):**
+- Act 0: canvas cursor-light works if touch is not the primary input; otherwise skip to Act 1.
+- Act 2: tap hotspots instead of hover. Double-tap to enter site.
+- Nav: collapse to hamburger at 1024px. Mega menus become full-screen panels.
+
+**Mobile (<768px):**
+- Acts 0–1: skip cursor experience. Show curtain image with centered "FOR LIGHT" wordmark and a `btn-terra` "Enter" button.
+- Act 2: tap to illuminate fixtures one by one.
+- Act 3: scroll experience works; text overlays are shorter (Cormorant Garamond 22px).
+- Homepage: all sections stack full-width. Stats row becomes 2-column. Footer becomes single column.
 
 ---
 
 ## PERFORMANCE REQUIREMENTS
 
-- All images lazy-loaded except `assets/curtain.jpg` (needed immediately).
-- Video preloaded but not autoplayed until Act 0 is complete.
-- Canvas redraws throttled to `requestAnimationFrame` — never on raw `mousemove` directly.
-- Scroll handler throttled using `requestAnimationFrame`.
-- Total page weight target: under 4MB (before video asset).
+- `assets/curtain.jpg` is NOT lazy-loaded (needed on first frame).
+- All other images: `loading="lazy"`.
+- Video: `preload="metadata"` initially. Switch to `preload="auto"` only after Act 0 canvas interaction begins (signal user intent).
+- Canvas rAF: one global animation loop using a `dirty` flag — only redraw if intensity values changed.
+- Scroll handler: one rAF-throttled listener for all scroll effects.
+- Page weight target: under 4MB excluding video asset. Images: WebP format, maximum 600KB each.
+- All `gsap.to` calls use `overwrite: 'auto'` to prevent conflicting tweens.
 
 ---
 
-## ASSET PLACEHOLDER SPECS (for AI-generated or stock assets)
+## ASSET SPECS (for AI image generation)
 
-Generate or source these assets to match the style described:
+Generate all assets consistent with the brand's warm-earthen aesthetic.
 
-| Asset | File | Dimensions | Description |
+| Asset | File | Dimensions | Generation prompt |
 |---|---|---|---|
-| Curtain still | `assets/curtain.jpg` | 3840×2160 | Half-open velvet or linen curtain, warm interior light behind it, dramatic |
-| Intro video | `assets/intro-video.mp4` | 1920×1080 | 8–12 sec: curtain closes slowly, camera pulls back revealing full living room |
-| Room dim | `assets/room-dim.jpg` | 3840×2160 | Modern living room, large windows to balcony, minimal warm ambient light only |
+| Curtain still | `assets/curtain.jpg` | 3840×2160 | Heavy linen curtain, half-open, warm parchment and gold tones. Soft amber interior light glowing from behind. Cinematic composition, deep focus. No people. Architectural photography style. |
+| Intro video | `assets/intro-video.mp4` | 1920×1080 | 8–12 sec cinemagraph: linen curtain slowly draws closed, camera pulls back to reveal a modern luxury NYC apartment living room, cream walls, dark oak floors, floor-to-ceiling windows, dim candlelight warmth. |
+| Room dim | `assets/room-dim.jpg` | 3840×2160 | Modern luxury NYC apartment living room. Cream walls, dark oak floors, linen sofa, brass side table. Floor-to-ceiling windows, balcony beyond. Room lit only by faint warm ambient sources — no overhead lights. Pre-dawn feel. Architectural Digest quality. |
 
-**Style reference for all assets:**
-Modern luxury NYC apartment. Warm neutral palette — cream walls, dark wood floors, linen furniture. Floor-to-ceiling windows with a balcony view. Warm amber light sources. Cinematic, not editorial. Shot or rendered as if by a luxury architecture photographer (think Architectural Digest, not IKEA).
+**Style consistency note for all assets:** Palette should match the brand — warm parchment, aged brass, deep forest. No blues, no cool grays, no stark white. Film-like grain is acceptable. Images should feel like they were taken by a luxury architectural photographer on medium format film.
 
 ---
 
